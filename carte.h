@@ -8,6 +8,8 @@ class Carte {
 
 	class Case {
 
+	public:
+
 		// Attributs 
 		Carte::Terrain type;
 		int elevation;
@@ -24,17 +26,17 @@ class Carte {
 
 	};
 
-	std::map<int, Case&> cases;
+	std::map<int, Case*> cases;
+	int taille;
+	bool porte_presente;
 	int longueur;
 	int largeur;
-	int taille;
-
+	int capacite;
 
 	Carte(int, int);
 
-
-
-	void ajouter_case(Case&);
+	void ajouter_case(Case*);
+	void ajouter_tresor(int, int);
 	double distance_minimale(Case&, Case&);
 
 	void inserer(Case&);

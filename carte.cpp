@@ -1,9 +1,18 @@
 #include "carte.h"
+#include <iostream>
 
-Carte::Carte(int longueur, int largeur):
-longueur(longueur),
-largeur(largeur),
-taille(0) {}
+Carte::Carte(int longueur, int largeur): taille(0), porte_presente(false) {
+
+	if(longueur < 1 || largeur < 1) {
+		std::cerr << "La longueur et la largeur de la matrice doivent êtres plus grand que 1." << std::endl;
+		exit(-1);
+	}
+
+	this->longueur = longueur;
+	this->largeur = largeur;
+	this->capacite = longueur * largeur;
+
+}
 
 
 Carte::Case::Case(char type, int elevation, bool tresor):
@@ -37,22 +46,33 @@ tresor(false)
 
 }
 
-void Carte::ajouter_case(Carte::Case& ucase){
+void Carte::ajouter_case(Carte::Case* ucase){
 
-	this->cases[++taille] = ucase;
+	if(ucase->type == Carte::Terrain::Porte){
 
+		if(this->porte_presente){
+			std::cerr << "Il ne peut y avoir plus d'une porte dans la matrice";
+			std::cerr << std::endl;
+			exit(-2);
+		}
+
+		this->porte_presente = true;
+
+	}
+
+	this->cases[++taille] = &ucase;
 
 	// Si pas premier de colonne
 	if(this->taille % this->largeur != 1){
 
-		ucase.ajouter_voisin(this->cases[this->taille -1]);
+		ucase->ajouter_voisin(this->cases[this->taille -1]);
 	}
 
 	// Si dernier de colonne 
 	if(this->taille % this->largeur == 0){
 
 		// prendre la première case de la ligne et lui ajouter ce voisin
-		this->cases[this->taille - this->largeur + 1].ajouter_voisin(ucase);
+		this->cases[this->taille - this->largeur + 1].ajouter_voisin(&ucase);
 
 	}
 
@@ -60,38 +80,44 @@ void Carte::ajouter_case(Carte::Case& ucase){
 	if(this->taille > this->largeur){
 
 		//ajouter voisin de haut
-		ucase.ajouter_voisin(this->cases[this->taille - this->largeur]);
+		ucase->ajouter_voisin(this->cases[this->taille - this->largeur]);
 
 		// Si pas premier de colonne
 		if(this->taille % this->largeur != 1){
 
 			// voisin haut/gauche
-			ucase.ajouter_voisin(this->cases[this->taille - this->largeur -1]);
+			ucase->ajouter_voisin(this->cases[this->taille - this->largeur -1]);
 		}
 
 		// Si pas dernier de colonne 
 		if(this->taille % this->largeur != 0){
 
 			// voisin haut/droit
-			ucase.ajouter_voisin(this->cases[this->taille - this->largeur + 1]);
+			ucase->ajouter_voisin(this->cases[this->taille - this->largeur + 1]);
 
 		}
 
 	}
 
+}
 
+void Carte::ajouter_tresor(int x, int y){
 
+	int position = this->largeur * x + y;
 
-	// voisin haut
+	if(position > this->capacite) {
+		std::cerr << "Coordonées de trésor invalide." << std::endl;
+		exit(-3);
+	}
 
+	if()
 
-	//vérifier si dernière colonne, si oui connecter avec la case de gauche et de droite
+	this->cases[position].tresor = true;
+}
 
-	if
-	//verifier si voisin 
+void Carte::Case::ajouter_voisin(Carte::Case& ucase){
 
-	//vérifier si d
-
+	double distance;
 
 
 }
