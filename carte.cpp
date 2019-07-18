@@ -39,7 +39,59 @@ tresor(false)
 
 void Carte::ajouter_case(Carte::Case& ucase){
 
-	this->cases.insert(std::pair<int, Case&>(taille, ucase));
-	this->taille++;
+	this->cases[++taille] = ucase;
+
+
+	// Si pas premier de colonne
+	if(this->taille % this->largeur != 1){
+
+		ucase.ajouter_voisin(this->cases[this->taille -1]);
+	}
+
+	// Si dernier de colonne 
+	if(this->taille % this->largeur == 0){
+
+		// prendre la première case de la ligne et lui ajouter ce voisin
+		this->cases[this->taille - this->largeur + 1].ajouter_voisin(ucase);
+
+	}
+
+	// Si pas première ligne
+	if(this->taille > this->largeur){
+
+		//ajouter voisin de haut
+		ucase.ajouter_voisin(this->cases[this->taille - this->largeur]);
+
+		// Si pas premier de colonne
+		if(this->taille % this->largeur != 1){
+
+			// voisin haut/gauche
+			ucase.ajouter_voisin(this->cases[this->taille - this->largeur -1]);
+		}
+
+		// Si pas dernier de colonne 
+		if(this->taille % this->largeur != 0){
+
+			// voisin haut/droit
+			ucase.ajouter_voisin(this->cases[this->taille - this->largeur + 1]);
+
+		}
+
+	}
+
+
+
+
+	// voisin haut
+
+
+	//vérifier si dernière colonne, si oui connecter avec la case de gauche et de droite
+
+	if
+	//verifier si voisin 
+
+	//vérifier si d
+
+
 
 }
