@@ -6,14 +6,13 @@ executable = tp3
 default : $(executable)
 
 $(executable) : main.o carte.o 
-	g++ -o $(executable) carte.o $(options)
-
+	g++ -o $@ $^ $(options)
 
 main.o : main.cpp carte.h
-	g++ -o main.o -c main.o $(options)
+	g++ -o $@ -c $< $(options)
 
 carte.o : carte.cpp carte.h
-	g++ -o carte.o -c carte.h $(options)
+	g++ -o $@ -c $< $(options)
 
 push :
 	@make clean
@@ -22,7 +21,7 @@ push :
 	git push origin master
 
 clean : 
-	rm -fr tests *.out *.o
+	rm -fr $(executable) tests *.out *.o
 
 
 

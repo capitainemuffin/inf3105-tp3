@@ -1,0 +1,35 @@
+#! /usr/bin/expect
+
+foreach f [glob tests/test?] {
+
+	puts " ------------------------ "
+	puts "Fichier : $f"
+	set fichier [open "$f"]
+	set commandes [split [read $fichier] "\n"]
+	close $fichier
+
+	spawn ./tp2
+
+	foreach commande $commandes {
+	
+		send "$commande\r"
+
+	}
+
+	interact
+
+	set fichier [open "${f}res"]
+	set commandes [split [read $fichier] "\n"]
+	close $fichier
+
+	foreach commande $commandes {
+	
+		puts "Attendu : $commande\r"
+
+	}
+
+
+}
+
+
+
