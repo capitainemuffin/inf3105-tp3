@@ -8,7 +8,7 @@ foreach f [glob tests/test?] {
 	set commandes [split [read $fichier] "\n"]
 	close $fichier
 
-	spawn ./tp2
+	spawn ./tp3
 
 	foreach commande $commandes {
 	

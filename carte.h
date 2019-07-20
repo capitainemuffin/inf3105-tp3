@@ -4,6 +4,7 @@
 
 class Carte {
 
+public:
 	enum class Terrain { Plaine, Eau, Foret, Route, Porte };
 
 	class Case {
@@ -14,19 +15,21 @@ class Carte {
 		Carte::Terrain type;
 		int elevation;
 		bool tresor;
-        std::set<std::pair<Case&, double>> voisins;
+        std::set<std::pair<Case*, double>> voisins;
 
-        // Constructeur
+        // Constructeur 
 		Case(char, int, bool);
+		~Case();
 
 		// Methode -> l'ajouter à la liste en calculant la distance.
-		void ajouter_voisin(Case&);
+		void ajouter_voisin_orthogonal(Case*);
+		void ajouter_voisin_diagonal(Case*);
 
 		// Ajouter un voisin
 
 	};
 
-	std::map<int, Case*> cases;
+	std::map<int,Case*> cases;
 	int taille;
 	bool porte_presente;
 	int longueur;
@@ -34,11 +37,13 @@ class Carte {
 	int capacite;
 
 	Carte(int, int);
+	~Carte();
 
 	void ajouter_case(Case*);
-	void ajouter_tresor(int, int);
-	double distance_minimale(Case&, Case&);
+	void ajouter_tresor(int position);
+	double meilleur_chemin(Case*, Case*);
+	void afficher_meilleurs_chemins();
 
 	void inserer(Case&);
-	friend std::istream& operator >> (std::istream&, Carte&);
+	friend std::istream& operator >> (std::ifstream&, Carte&);
 };
