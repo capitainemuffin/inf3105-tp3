@@ -1,17 +1,25 @@
 #include "carte.h"
 #include <iostream>
 
-Carte::Carte(int longueur, int largeur): taille(0), porte_presente(false) {
+Carte::Carte(int base, int hauteur): taille(0), porte_presente(false) {
 
-	if(longueur < 1 || largeur < 1) {
+	if(base < 1 || hauteur < 1) {
 		std::cerr << "La longueur et la largeur de la matrice doivent êtres plus grand que 1." << std::endl;
 		exit(-1);
 	}
 
-	this->longueur = longueur;
-	this->largeur = largeur;
-	this->capacite = longueur * largeur;
+	this->base = base;
+	this->hauteur = hauteur;
+	this->capacite = base * hauteur;
 
+}
+
+Carte::~Carte(){
+
+	for(int i = 0 ; i < this->taille ; i++) {
+
+		delete this->cases[i];
+	}
 }
 
 
@@ -57,7 +65,7 @@ void Carte::ajouter_case(Carte::Case* ucase){
 	if(ucase->type == Carte::Terrain::Porte){
 
 		if(this->porte_presente){
-			std::cerr << "Il ne peut y avoir plus d'une porte dans la matrice";
+			std::cerr << "Il ne peut y avoir plus d'une porte dans la matrice.";
 			std::cerr << std::endl;
 			exit(-2);
 		}
@@ -66,43 +74,52 @@ void Carte::ajouter_case(Carte::Case* ucase){
 
 	}
 
+	if(this->taille >= this->capacite) {
+			std::cerr << "La taille maximale de la matrice a été dépassée.";
+			std::cerr << std::endl;
+			exit(-5);
+
+	}
+
 	this->cases[++taille] = ucase;
+	ucase->index = this->taille;
 
 	// Si pas premier de colonne, connecter avec voisin de gauche
-	if(this->taille % this->largeur != 1){
-
+	if(this->taille % this->base != 1){
 		ucase->ajouter_voisin_orthogonal(this->cases[this->taille -1]);
 		this->cases[this->taille-1]->ajouter_voisin_orthogonal(ucase);
 	}
 
 	// Si dernier de colonne 
-	if(this->taille % this->largeur == 0){
+	if(this->taille % this->base == 0){
 
 		// prendre la première case de la ligne et lui ajouter ce voisin
-		ucase->ajouter_voisin_orthogonal(this->cases[this->taille - this->largeur + 1]);
-		this->cases[this->taille - this->largeur + 1]->ajouter_voisin_orthogonal(ucase);
+		ucase->ajouter_voisin_orthogonal(this->cases[this->taille - this->base + 1]);
+		this->cases[this->taille - this->base + 1]->ajouter_voisin_orthogonal(ucase);
 
 	}
 
 	// Si pas première ligne
-	if(this->taille > this->largeur){
+	if(this->taille > this->base){
 
 		//ajouter voisin de haut
-		ucase->ajouter_voisin_orthogonal(this->cases[this->taille - this->largeur]);
-		this->cases[this->taille - this->largeur]->ajouter_voisin_orthogonal(ucase);
+		ucase->ajouter_voisin_orthogonal(this->cases[this->taille - this->base]);
+		this->cases[this->taille - this->base]->ajouter_voisin_orthogonal(ucase);
 
 		// Si pas premier de colonne
-		if(this->taille % this->largeur != 1){
+		if(this->taille % this->base != 1){
 
 			// voisin haut/gauche
-			ucase->ajouter_voisin_diagonal(this->cases[this->taille - this->largeur -1]);
+			ucase->ajouter_voisin_diagonal(this->cases[this->taille - this->base -1]);
+			this->cases[this->taille - this->base -1]->ajouter_voisin_diagonal(ucase);
 		}
 
 		// Si pas dernier de colonne 
-		if(this->taille % this->largeur != 0){
+		if(this->taille % this->base != 0){
 
 			// voisin haut/droit
-			ucase->ajouter_voisin_diagonal(this->cases[this->taille - this->largeur + 1]);
+			ucase->ajouter_voisin_diagonal(this->cases[this->taille - this->base + 1]);
+			this->cases[this->taille - this->base +1]->ajouter_voisin_diagonal(ucase);
 
 		}
 
@@ -118,7 +135,7 @@ void Carte::ajouter_tresor(int position){
 	}
 
 	if(this->cases[position]->type == Carte::Terrain::Eau){
-		std::cerr << "Un trésor ne peut pas être dans l'eau." << std::endl;
+		std::cerr << "Un trésor ne peut pas être dans l'eau." << std::endl;
 		exit(-4);
 	}
 
@@ -134,7 +151,6 @@ void Carte::Case::ajouter_voisin_orthogonal(Carte::Case* ucase){
 		&& ucase->type != Carte::Terrain::Eau
 		&& this->elevation - ucase->elevation >= -1
 		&& this->elevation - ucase->elevation <= 1){
-
 
 		switch (ucase->type){
 
@@ -156,7 +172,6 @@ void Carte::Case::ajouter_voisin_orthogonal(Carte::Case* ucase){
 		}
 
 		if(this->elevation - ucase->elevation < 0) distance *= 2; 
-
 		this->voisins.insert(std::make_pair(ucase, distance));
 
 	}
@@ -199,6 +214,13 @@ void Carte::Case::ajouter_voisin_diagonal(Carte::Case* ucase){
 
 	}
 
+}
+
+void Carte::afficher_meilleurs_chemins(){
+
+	
+
+	std::cout << "a faire";
 }
 
 

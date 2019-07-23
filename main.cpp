@@ -2,6 +2,44 @@
 #include <fstream>
 #include "carte.h"
 
+std::ostream& operator<< (std::ostream& is , Carte::Case* ucase) {
+
+		switch(ucase->type){
+
+		case Carte::Terrain::Plaine : {
+			is << "Type : Plaine";
+			break;
+		}
+		case Carte::Terrain::Eau : {
+			is << "Type : Eau";
+			break;
+		}
+		case Carte::Terrain::Foret : {
+			is << "Type : Foret";
+			break;
+		}
+		case Carte::Terrain::Route : {
+			is << "Type : Route";
+			break;
+		}
+		case Carte::Terrain::Porte : {
+			is << "Type : Porte";
+			break;
+		}
+	}
+
+		is << " Tresor : " << ucase->tresor;
+
+		is << " Élevation " << ucase->elevation;
+
+		is << " Nbr de voisins " << ucase->voisins.size();
+
+		is << " Index : " << ucase->index;
+
+		return is;
+}
+
+
 /**
  * Demande d'entrer un nom de fichier puis essaye de l'ouvrir.
  * Valide l'existence du fichier et l'extension ".txt".
@@ -35,24 +73,24 @@ int main (){
 
 	std::ifstream fichier;
 	validation_fichier(fichier);
-	size_t longueur, largeur;
-	fichier >> longueur >> largeur;
+	size_t base, hauteur;
+	fichier >> base >> hauteur;
 
-	Carte carte = Carte(longueur, largeur);
+	Carte carte = Carte(base, hauteur);
 
-	for(int i = 0 ; i < largeur ; i++){
+	for(int i = 0 ; i < hauteur ; i++){
 
-		for(int j = 0 ; j < longueur ; j++) {
+		for(int j = 0 ; j < base ; j++) {
 
 			char type;
 			int elevation;
-			fichier >> type >> elevation;
-			Carte::Case* ucase = new Carte::Case(type, elevation);
+			fichier >> type >> elevation;
+			Carte::Case* ucase = new Carte::Case(type, elevation, false);
 			carte.ajouter_case(ucase);
 
 		}
 
-		fichier >> std:ws;
+		fichier >> std::ws;
 
 	}
 
@@ -60,17 +98,22 @@ int main (){
 
 		int x, y;
 
-		fichier >> x >> y >> std::ws;
+		fichier >> x >> y >> std::ws;
 
-		int position = 
+		int position = base * y + x + 1;
+
+		carte.cases[position]->tresor = true;
+	}
+
+	std::cout << "Moi : " << carte.cases[25] << std::endl;
+	for (auto it = carte.cases[25]->voisins.begin() ; it != carte.cases[25]->voisins.end() ; ++it){
+		std::cout <<  "Voisin : " << it->first << " Distance : " << it->second <<  std::endl;
 	}
 
 
-
-	fichier >> carte;
 	fichier.close();
 
 	carte.afficher_meilleurs_chemins();
-	std::cout << std::endl;
+	std::cout << std::endl;
 	return 0;
 }

@@ -15,16 +15,18 @@ public:
 		Carte::Terrain type;
 		int elevation;
 		bool tresor;
+		int index;
+		//liste d'adjacence -> la case et la distance 
         std::set<std::pair<Case*, double>> voisins;
 
         // Constructeur 
 		Case(char, int, bool);
-		~Case();
 
 		// Methode -> l'ajouter à la liste en calculant la distance.
 		void ajouter_voisin_orthogonal(Case*);
 		void ajouter_voisin_diagonal(Case*);
 
+		friend std::ostream& operator<< (std::ostream&, Carte::Case*); 
 		// Ajouter un voisin
 
 	};
@@ -32,8 +34,8 @@ public:
 	std::map<int,Case*> cases;
 	int taille;
 	bool porte_presente;
-	int longueur;
-	int largeur;
+	int base;
+	int hauteur;
 	int capacite;
 
 	Carte(int, int);
@@ -45,5 +47,4 @@ public:
 	void afficher_meilleurs_chemins();
 
 	void inserer(Case&);
-	friend std::istream& operator >> (std::ifstream&, Carte&);
 };

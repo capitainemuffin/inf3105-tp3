@@ -1,0 +1,11 @@
+Porte -> T1 : 3
+T1 -> T2 : 2.8
+T2 -> T3 : 3.4
+T3 -> Porte : 5.4
+Total : 14.6
+
+Porte -> T3 : 3.4
+T3 -> T2 : 3.4
+T2 -> T1 : 2.8
+T1 -> Porte : 5
+Total : 14.6
