@@ -15,6 +15,7 @@ public:
 		Carte::Terrain type;
 		int elevation;
 		bool tresor;
+		bool visite;
 		int index;
 		//liste d'adjacence -> la case et la distance 
         std::set<std::pair<Case*, double>> voisins;

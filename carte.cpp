@@ -1,6 +1,7 @@
 #include "carte.h"
 #include <iostream>
-
+#include <vector>
+#include <queue>
 Carte::Carte(int base, int hauteur): taille(0), porte_presente(false) {
 
 	if(base < 1 || hauteur < 1) {
@@ -25,7 +26,8 @@ Carte::~Carte(){
 
 Carte::Case::Case(char type, int elevation, bool tresor):
 elevation(elevation),
-tresor(false)
+tresor(false),
+visite(false)
 
 {
 
@@ -216,9 +218,38 @@ void Carte::Case::ajouter_voisin_diagonal(Carte::Case* ucase){
 
 }
 
-void Carte::afficher_meilleurs_chemins(){
+double Carte::meilleur_chemin(Carte::Case* debut, Carte::Case* fin){
 
 	
+
+
+}
+
+void Carte::afficher_meilleurs_chemins(){
+
+	Carte::Case* porte;
+	std::vector<Carte::Case*> tresors;
+
+	for(auto it = this->cases.begin() ; it != this->cases.end() ; ++it){
+
+		if(it->second->type == Carte::Terrain::Porte){
+
+			porte = it->second;
+
+		} 
+
+		if (it->second->tresor == true) {
+
+			tresors.push_back(it->second);
+		}
+
+	}
+
+	for(auto it = tresors.begin() ; it != tresors.end() ; ++it){
+
+
+	}
+
 
 	std::cout << "a faire";
 }
