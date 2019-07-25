@@ -102,7 +102,7 @@ int main (){
 
 		int position = base * y + x + 1;
 
-		carte.cases[position]->tresor = true;
+		carte.ajouter_tresor(position);
 	}
 
 	fichier.close();

@@ -33,6 +33,7 @@ public:
 	};
 
 	std::map<int,Case*> cases;
+	std::map<Case*, std::string> tresors;
 	int taille;
 	bool porte_presente;
 	int base;

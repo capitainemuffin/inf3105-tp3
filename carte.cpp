@@ -97,7 +97,6 @@ void Carte::ajouter_case(Carte::Case* ucase){
 	if(this->taille % this->base == 0){
 
 		// prendre la première case de la ligne et lui ajouter ce voisin
-		ucase->ajouter_voisin_orthogonal(this->cases[this->taille - this->base + 1]);
 		this->cases[this->taille - this->base + 1]->ajouter_voisin_orthogonal(ucase);
 
 	}
@@ -143,6 +142,15 @@ void Carte::ajouter_tresor(int position){
 	}
 
 	this->cases[position]->tresor = true;
+
+	auto iter = this->tresors.begin();
+	int i = 1;
+	while(iter != this->tresors.end()){
+		i++;
+		++iter;
+	}
+
+	this->tresors[this->cases[position]] = "T" + std::to_string(i);
 }
 
 void Carte::Case::ajouter_voisin_orthogonal(Carte::Case* ucase){
@@ -152,23 +160,25 @@ void Carte::Case::ajouter_voisin_orthogonal(Carte::Case* ucase){
 	// Vérifier que c'est pas de l'eau et que élevation est acceptbable
 	if(this->type != Carte::Terrain::Eau 
 		&& ucase->type != Carte::Terrain::Eau
-		&& this->elevation - ucase->elevation >= -1
-		&& this->elevation - ucase->elevation <= 1){
+		&& this->elevation - ucase->elevation > -2
+		&& this->elevation - ucase->elevation < 2){
 
 		switch (ucase->type){
 
 			case Carte::Terrain::Foret : {
+
 				distance = 2;
 				break;
 			}
 
 			case Carte::Terrain::Route : {
 
-				if(this->type == Carte::Terrain::Route) distance = 0.5;
+				distance = this->type == Carte::Terrain::Route ? 0.5 : 1;
 				break;
 			}
 
 			default : {
+
 				distance = 1;
 				break;
 			}
@@ -195,17 +205,19 @@ void Carte::Case::ajouter_voisin_diagonal(Carte::Case* ucase){
 		switch (ucase->type){
 
 			case Carte::Terrain::Foret : {
+
 				distance = 2.8;
 				break;
 			}
 
 			case Carte::Terrain::Route : {
 
-				if(this->type == Carte::Terrain::Route) distance = 0.7;
+				distance = this->type == Carte::Terrain::Route ? 0.7 : 1.4;
 				break;
 			}
 
 			default : {
+
 				distance = 1.4;
 				break;
 			}
@@ -241,34 +253,30 @@ void Carte::calculer_chemins(Carte::Case* debut){
 	while (true) {
 
 		// trouver le noeud le plus proche non visité
-		std::pair<Carte::Case*, double>* ucase = nullptr;
+		std::pair<Carte::Case*, double> ucase (nullptr, NULL);
 		for(auto it = debut->voisins.begin() ; it != debut->voisins.end() ; ++it) {
 
-			if(!ucase || (it->first->visite == false && it->second <= ucase->second)){
+			if(!ucase.first || (it->first->visite == false && it->second <= ucase.second)){
 
-				*ucase = std::make_pair(it->first, it->second);
+				ucase = std::make_pair(it->first, it->second);
 
 			}
 		}
 
 		//Si aucun noeud à visiter, sortir de la boucle
-		if(ucase->first->visite == true) break;
-
-		std::cout << "Noeud visité : " << std::endl;
-		std::cout << " Distance : " << ucase->second << std::endl;
+		if(ucase.first->visite == true) break;
 
 		// parcourir les voisins du noeud et mettre à jour les distances.
-		for(auto it = ucase->first->voisins.begin() ; it != ucase->first->voisins.end() ; ++it) {
+		for(auto it = ucase.first->voisins.begin() ; it != ucase.first->voisins.end() ; ++it) {
 
-			if(ucase->second + it->second < debut->voisins[it->first]){
+			if(ucase.second + it->second < debut->voisins[it->first]){
 
-				debut->voisins[it->first] = ucase->second + it->second;
+				debut->voisins[it->first] = ucase.second + it->second;
 			}
 
 		}
 
-		ucase->first->visite = true;
-		delete ucase;
+		ucase.first->visite = true;
 
 	}
 
@@ -298,12 +306,16 @@ void Carte::afficher_meilleurs_chemins(){
 
 	}
 
-
 	std::cout << "après traitenement" << std::endl;
 	for(auto it = porte->voisins.begin() ; it != porte->voisins.end() ; ++it) {
 
-		std::cout << "Index : " << it->first->index << " Distance : " << it->second << std::endl;
+		std::cout << "Index : " << it->first->index << " Distance : " << it->second << " Tresor ? " << it->first->tresor << std::endl;
 
+	}
+
+	for(auto it = this->tresors.begin() ; it != this->tresors.end() ; ++it){
+
+		std::cout << it->second << " : " << it->first->index << std::endl;
 	}
 
 
