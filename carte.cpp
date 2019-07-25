@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <limits>
 Carte::Carte(int base, int hauteur): taille(0), porte_presente(false) {
 
 	if(base < 1 || hauteur < 1) {
@@ -55,7 +56,7 @@ visite(false)
 		}
 
 		default : {
-			std::cout << "Type de terrain incorrect." << std::endl;
+			std::cerr << "Type de terrain incorrect." << std::endl;
 			exit(-10);
 		}
 	}
@@ -218,10 +219,58 @@ void Carte::Case::ajouter_voisin_diagonal(Carte::Case* ucase){
 
 }
 
-double Carte::meilleur_chemin(Carte::Case* debut, Carte::Case* fin){
+void Carte::calculer_chemins(Carte::Case* debut){
 
-	
+	// Ajouter tous les noeuds dans la liste de voisins de la case debut
+	for(auto it = this->cases.begin(); it != this->cases.end() ; ++it) {
 
+		if(it->second == debut){
+
+			debut->voisins.insert(std::make_pair(debut, 0));
+
+		} else if(debut->voisins.find(it->second) == debut->voisins.end()){
+
+			debut->voisins.insert(std::make_pair(it->second, std::numeric_limits<double>::max()));
+
+		}
+
+		it->second->visite = false;
+
+	}
+
+	while (true) {
+
+		// trouver le noeud le plus proche non visité
+		std::pair<Carte::Case*, double>* ucase = nullptr;
+		for(auto it = debut->voisins.begin() ; it != debut->voisins.end() ; ++it) {
+
+			if(!ucase || (it->first->visite == false && it->second <= ucase->second)){
+
+				*ucase = std::make_pair(it->first, it->second);
+
+			}
+		}
+
+		//Si aucun noeud à visiter, sortir de la boucle
+		if(ucase->first->visite == true) break;
+
+		std::cout << "Noeud visité : " << std::endl;
+		std::cout << " Distance : " << ucase->second << std::endl;
+
+		// parcourir les voisins du noeud et mettre à jour les distances.
+		for(auto it = ucase->first->voisins.begin() ; it != ucase->first->voisins.end() ; ++it) {
+
+			if(ucase->second + it->second < debut->voisins[it->first]){
+
+				debut->voisins[it->first] = ucase->second + it->second;
+			}
+
+		}
+
+		ucase->first->visite = true;
+		delete ucase;
+
+	}
 
 }
 
@@ -230,28 +279,34 @@ void Carte::afficher_meilleurs_chemins(){
 	Carte::Case* porte;
 	std::vector<Carte::Case*> tresors;
 
+	// Chercher la porte et les tresors 
 	for(auto it = this->cases.begin() ; it != this->cases.end() ; ++it){
 
 		if(it->second->type == Carte::Terrain::Porte){
 
 			porte = it->second;
+			calculer_chemins(porte);
 
 		} 
 
 		if (it->second->tresor == true) {
 
 			tresors.push_back(it->second);
+			calculer_chemins(it->second);
+
 		}
 
 	}
 
-	for(auto it = tresors.begin() ; it != tresors.end() ; ++it){
 
+	std::cout << "après traitenement" << std::endl;
+	for(auto it = porte->voisins.begin() ; it != porte->voisins.end() ; ++it) {
+
+		std::cout << "Index : " << it->first->index << " Distance : " << it->second << std::endl;
 
 	}
 
 
-	std::cout << "a faire";
 }
 
 

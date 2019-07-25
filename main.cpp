@@ -105,12 +105,6 @@ int main (){
 		carte.cases[position]->tresor = true;
 	}
 
-	std::cout << "Moi : " << carte.cases[22] << std::endl;
-	for (auto it = carte.cases[22]->voisins.begin() ; it != carte.cases[22]->voisins.end() ; ++it){
-		std::cout <<  "Voisin : " << it->first << " Distance : " << it->second <<  std::endl;
-	}
-
-
 	fichier.close();
 
 	carte.afficher_meilleurs_chemins();

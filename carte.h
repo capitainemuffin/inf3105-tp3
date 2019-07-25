@@ -18,7 +18,7 @@ public:
 		bool visite;
 		int index;
 		//liste d'adjacence -> la case et la distance 
-        std::set<std::pair<Case*, double>> voisins;
+        std::map<Case*, double> voisins;
 
         // Constructeur 
 		Case(char, int, bool);
@@ -44,7 +44,7 @@ public:
 
 	void ajouter_case(Case*);
 	void ajouter_tresor(int position);
-	double meilleur_chemin(Case*, Case*);
+	void calculer_chemins(Case*);
 	void afficher_meilleurs_chemins();
 
 	void inserer(Case&);
