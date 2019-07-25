@@ -14,14 +14,13 @@ public:
 		// Attributs 
 		Carte::Terrain type;
 		int elevation;
-		bool tresor;
 		bool visite;
 		int index;
 		//liste d'adjacence -> la case et la distance 
         std::map<Case*, double> voisins;
 
         // Constructeur 
-		Case(char, int, bool);
+		Case(char, int);
 
 		// Methode -> l'ajouter à la liste en calculant la distance.
 		void ajouter_voisin_orthogonal(Case*);
@@ -35,7 +34,7 @@ public:
 	std::map<int,Case*> cases;
 	std::map<Case*, std::string> tresors;
 	int taille;
-	bool porte_presente;
+	Case* porte;
 	int base;
 	int hauteur;
 	int capacite;

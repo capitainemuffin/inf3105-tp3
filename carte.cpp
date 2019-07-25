@@ -3,7 +3,7 @@
 #include <vector>
 #include <queue>
 #include <limits>
-Carte::Carte(int base, int hauteur): taille(0), porte_presente(false) {
+Carte::Carte(int base, int hauteur): taille(0), porte(nullptr) {
 
 	if(base < 1 || hauteur < 1) {
 		std::cerr << "La longueur et la largeur de la matrice doivent êtres plus grand que 1." << std::endl;
@@ -25,9 +25,8 @@ Carte::~Carte(){
 }
 
 
-Carte::Case::Case(char type, int elevation, bool tresor):
+Carte::Case::Case(char type, int elevation):
 elevation(elevation),
-tresor(false),
 visite(false)
 
 {
@@ -67,13 +66,13 @@ void Carte::ajouter_case(Carte::Case* ucase){
 
 	if(ucase->type == Carte::Terrain::Porte){
 
-		if(this->porte_presente){
+		if(porte){
 			std::cerr << "Il ne peut y avoir plus d'une porte dans la matrice.";
 			std::cerr << std::endl;
 			exit(-2);
 		}
 
-		this->porte_presente = true;
+		this->porte = ucase;
 
 	}
 
@@ -140,8 +139,6 @@ void Carte::ajouter_tresor(int position){
 		std::cerr << "Un trésor ne peut pas être dans l'eau." << std::endl;
 		exit(-4);
 	}
-
-	this->cases[position]->tresor = true;
 
 	auto iter = this->tresors.begin();
 	int i = 1;
@@ -256,7 +253,7 @@ void Carte::calculer_chemins(Carte::Case* debut){
 		std::pair<Carte::Case*, double> ucase (nullptr, NULL);
 		for(auto it = debut->voisins.begin() ; it != debut->voisins.end() ; ++it) {
 
-			if(!ucase.first || (it->first->visite == false && it->second <= ucase.second)){
+			if(!ucase.first || (it->first->visite == false && it->second < ucase.second)){
 
 				ucase = std::make_pair(it->first, it->second);
 
@@ -284,41 +281,17 @@ void Carte::calculer_chemins(Carte::Case* debut){
 
 void Carte::afficher_meilleurs_chemins(){
 
-	Carte::Case* porte;
-	std::vector<Carte::Case*> tresors;
-
-	// Chercher la porte et les tresors 
-	for(auto it = this->cases.begin() ; it != this->cases.end() ; ++it){
-
-		if(it->second->type == Carte::Terrain::Porte){
-
-			porte = it->second;
-			calculer_chemins(porte);
-
-		} 
-
-		if (it->second->tresor == true) {
-
-			tresors.push_back(it->second);
-			calculer_chemins(it->second);
-
-		}
-
-	}
-
-	std::cout << "après traitenement" << std::endl;
-	for(auto it = porte->voisins.begin() ; it != porte->voisins.end() ; ++it) {
-
-		std::cout << "Index : " << it->first->index << " Distance : " << it->second << " Tresor ? " << it->first->tresor << std::endl;
-
-	}
+	calculer_chemins(this->porte);
 
 	for(auto it = this->tresors.begin() ; it != this->tresors.end() ; ++it){
 
-		std::cout << it->second << " : " << it->first->index << std::endl;
+		calculer_chemins(it->first);
 	}
 
+	for(auto it = this->porte->voisins.begin() ; it != this->porte->voisins.end() ; ++ it) {
 
+		std::cout << "I : " << it->first->index << " Dist : " << it->second << std::endl;
+	}
 }
 
 

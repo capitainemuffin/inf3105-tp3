@@ -28,8 +28,6 @@ std::ostream& operator<< (std::ostream& is , Carte::Case* ucase) {
 		}
 	}
 
-		is << " Tresor : " << ucase->tresor;
-
 		is << " Élevation " << ucase->elevation;
 
 		is << " Nbr de voisins " << ucase->voisins.size();
@@ -85,7 +83,7 @@ int main (){
 			char type;
 			int elevation;
 			fichier >> type >> elevation;
-			Carte::Case* ucase = new Carte::Case(type, elevation, false);
+			Carte::Case* ucase = new Carte::Case(type, elevation);
 			carte.ajouter_case(ucase);
 
 		}
