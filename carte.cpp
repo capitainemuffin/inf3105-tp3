@@ -290,7 +290,7 @@ void Carte::afficher_meilleurs_chemins(){
 
 	for(auto it = this->porte->voisins.begin() ; it != this->porte->voisins.end() ; ++ it) {
 
-		std::cout << "I : " << it->first->index << " Dist : " << it->second << std::endl;
+		std::cout << "I : " << it->first->index << " Dist : " << it->second << std::endl;
 	}
 }
 
