@@ -71,7 +71,7 @@ int main (){
 
 	std::ifstream fichier;
 	validation_fichier(fichier);
-	size_t base, hauteur;
+	int base, hauteur;
 	fichier >> base >> hauteur;
 
 	Carte carte = Carte(base, hauteur);

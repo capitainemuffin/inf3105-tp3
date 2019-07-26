@@ -140,14 +140,7 @@ void Carte::ajouter_tresor(int position){
 		exit(-4);
 	}
 
-	auto iter = this->tresors.begin();
-	int i = 1;
-	while(iter != this->tresors.end()){
-		i++;
-		++iter;
-	}
-
-	this->tresors[this->cases[position]] = "T" + std::to_string(i);
+	this->tresors.push_back(this->cases[position]);
 }
 
 void Carte::Case::ajouter_voisin_orthogonal(Carte::Case* ucase){
@@ -285,13 +278,24 @@ void Carte::afficher_meilleurs_chemins(){
 
 	for(auto it = this->tresors.begin() ; it != this->tresors.end() ; ++it){
 
-		calculer_chemins(it->first);
+		calculer_chemins(*it);
+
+		std::cout << "Index : " << (*it)->index << " " << std::endl;
 	}
 
-	for(auto it = this->porte->voisins.begin() ; it != this->porte->voisins.end() ; ++ it) {
+	for(auto it = this->tresors.begin() ; it != this->tresors.end() ; ++ it) {
 
-		std::cout << "I : " << it->first->index << " Dist : " << it->second << std::endl;
+		std::cout << " ----- I : " << (*it)->index << std::endl;
+
+		for(auto it2 = (*it)->voisins.begin() ; it2 != (*it)->voisins.end() ; ++it2){
+
+			std::cout << "Index : " << (*it2).first->index << " Distance : " << (*it2).second << std::endl;
+		}
+
+
 	}
+
+
 }
 
 

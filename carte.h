@@ -1,6 +1,6 @@
-#include <set>
 #include <string>
 #include <map>
+#include <vector>
 
 class Carte {
 
@@ -32,7 +32,7 @@ public:
 	};
 
 	std::map<int,Case*> cases;
-	std::map<Case*, std::string> tresors;
+	std::vector<Carte::Case*> tresors;
 	int taille;
 	Case* porte;
 	int base;
