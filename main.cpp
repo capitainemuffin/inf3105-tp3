@@ -2,42 +2,6 @@
 #include <fstream>
 #include "carte.h"
 
-std::ostream &operator<<(std::ostream &is, Carte::Case *ucase) {
-
-    switch (ucase->type) {
-
-        case Carte::Terrain::Plaine : {
-            is << "Type : Plaine";
-            break;
-        }
-        case Carte::Terrain::Eau : {
-            is << "Type : Eau";
-            break;
-        }
-        case Carte::Terrain::Foret : {
-            is << "Type : Foret";
-            break;
-        }
-        case Carte::Terrain::Route : {
-            is << "Type : Route";
-            break;
-        }
-        case Carte::Terrain::Porte : {
-            is << "Type : Porte";
-            break;
-        }
-    }
-
-    is << " Élevation " << ucase->elevation;
-
-    is << " Nbr de voisins " << ucase->voisins.size();
-
-    is << " Index : " << ucase->index;
-
-    return is;
-}
-
-
 /**
  * Demande d'entrer un nom de fichier puis essaye de l'ouvrir.
  * Valide l'existence du fichier et l'extension ".txt".
@@ -67,6 +31,11 @@ void validation_fichier(std::ifstream &fichier) {
 
 }
 
+/**
+ * Execution principale
+ *
+ * @return 0 si termine sans erreur
+ */
 int main() {
 
     std::ifstream fichier;
@@ -76,6 +45,7 @@ int main() {
 
     Carte carte = Carte(base, hauteur);
 
+    //Lecture et insertion des cases
     for (int i = 0; i < hauteur; i++) {
 
         for (int j = 0; j < base; j++) {
@@ -92,20 +62,20 @@ int main() {
 
     }
 
+    // Lecture et insertion des trésors
     for (int i = 0; i < 3; i++) {
 
         int x, y;
-
         fichier >> x >> y >> std::ws;
-
         int position = base * y + x + 1;
-
         carte.ajouter_tresor(position);
     }
 
     fichier.close();
 
+    // Afficher les meilleurs chemins
     carte.afficher_meilleurs_chemins();
     std::cout << std::endl;
+
     return 0;
 }
