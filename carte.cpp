@@ -280,7 +280,7 @@ void Carte::afficher_meilleurs_chemins(){
 
 		calculer_chemins(*it);
 
-		std::cout << "Index : " << (*it)->index << " " << std::endl;
+		std::cout << "Index : " << (*it)->index << " " << std::endl;
 	}
 
 	for(auto it = this->tresors.begin() ; it != this->tresors.end() ; ++ it) {
@@ -289,7 +289,7 @@ void Carte::afficher_meilleurs_chemins(){
 
 		for(auto it2 = (*it)->voisins.begin() ; it2 != (*it)->voisins.end() ; ++it2){
 
-			std::cout << "Index : " << (*it2).first->index << " Distance : " << (*it2).second << std::endl;
+			std::cout << "Index : " << (*it2).first->index << " Distance : " << (*it2).second << std::endl;
 		}
 
 
