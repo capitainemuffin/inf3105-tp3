@@ -3,298 +3,292 @@
 #include <vector>
 #include <queue>
 #include <limits>
-Carte::Carte(int base, int hauteur): taille(0), porte(nullptr) {
 
-	if(base < 1 || hauteur < 1) {
-		std::cerr << "La longueur et la largeur de la matrice doivent êtres plus grand que 1." << std::endl;
-		exit(-1);
-	}
+Carte::Carte(int base, int hauteur) : taille(0), porte(nullptr) {
 
-	this->base = base;
-	this->hauteur = hauteur;
-	this->capacite = base * hauteur;
+    if (base < 1 || hauteur < 1) {
+        std::cerr << "La longueur et la largeur de la matrice doivent êtres plus grand que 1." << std::endl;
+        exit(-1);
+    }
 
-}
-
-Carte::~Carte(){
-
-	for(int i = 0 ; i < this->taille ; i++) {
-
-		delete this->cases[i];
-	}
-}
-
-
-Carte::Case::Case(char type, int elevation):
-elevation(elevation),
-visite(false)
-
-{
-
-	switch(type){
-
-		case 'N' : {
-			this->type = Carte::Terrain::Plaine;
-			break;
-		}
-		case 'E' : {
-			this->type = Carte::Terrain::Eau;
-			break;
-		}
-		case 'F' : {
-			this->type = Carte::Terrain::Foret;
-			break;
-		}
-		case 'R' : {
-			this->type = Carte::Terrain::Route;
-			break;
-		}
-		case 'P' : {
-			this->type = Carte::Terrain::Porte;
-			break;
-		}
-
-		default : {
-			std::cerr << "Type de terrain incorrect." << std::endl;
-			exit(-10);
-		}
-	}
+    this->base = base;
+    this->capacite = base * hauteur;
 
 }
 
-void Carte::ajouter_case(Carte::Case* ucase){
+Carte::~Carte() {
 
-	if(ucase->type == Carte::Terrain::Porte){
+    for (int i = 0; i < this->taille; i++) {
 
-		if(porte){
-			std::cerr << "Il ne peut y avoir plus d'une porte dans la matrice.";
-			std::cerr << std::endl;
-			exit(-2);
-		}
+        delete this->cases[i];
+    }
+}
 
-		this->porte = ucase;
 
-	}
+Carte::Case::Case(char type, int elevation) :
+        elevation(elevation),
+        visite(false) {
 
-	if(this->taille >= this->capacite) {
-			std::cerr << "La taille maximale de la matrice a été dépassée.";
-			std::cerr << std::endl;
-			exit(-5);
+    switch (type) {
 
-	}
+        case 'N' : {
+            this->type = Carte::Terrain::Plaine;
+            break;
+        }
+        case 'E' : {
+            this->type = Carte::Terrain::Eau;
+            break;
+        }
+        case 'F' : {
+            this->type = Carte::Terrain::Foret;
+            break;
+        }
+        case 'R' : {
+            this->type = Carte::Terrain::Route;
+            break;
+        }
+        case 'P' : {
+            this->type = Carte::Terrain::Porte;
+            break;
+        }
 
-	this->cases[++taille] = ucase;
-	ucase->index = this->taille;
+        default : {
+            std::cerr << "Type de terrain incorrect." << std::endl;
+            exit(-10);
+        }
+    }
 
-	// Si pas premier de colonne, connecter avec voisin de gauche
-	if(this->taille % this->base != 1){
-		ucase->ajouter_voisin_orthogonal(this->cases[this->taille -1]);
-		this->cases[this->taille-1]->ajouter_voisin_orthogonal(ucase);
-	}
-
-	// Si dernier de colonne 
-	if(this->taille % this->base == 0){
-
-		// prendre la première case de la ligne et lui ajouter ce voisin
-		this->cases[this->taille - this->base + 1]->ajouter_voisin_orthogonal(ucase);
-
-	}
-
-	// Si pas première ligne
-	if(this->taille > this->base){
-
-		//ajouter voisin de haut
-		ucase->ajouter_voisin_orthogonal(this->cases[this->taille - this->base]);
-		this->cases[this->taille - this->base]->ajouter_voisin_orthogonal(ucase);
-
-		// Si pas premier de colonne
-		if(this->taille % this->base != 1){
-
-			// voisin haut/gauche
-			ucase->ajouter_voisin_diagonal(this->cases[this->taille - this->base -1]);
-			this->cases[this->taille - this->base -1]->ajouter_voisin_diagonal(ucase);
-		}
-
-		// Si pas dernier de colonne 
-		if(this->taille % this->base != 0){
-
-			// voisin haut/droit
-			ucase->ajouter_voisin_diagonal(this->cases[this->taille - this->base + 1]);
-			this->cases[this->taille - this->base +1]->ajouter_voisin_diagonal(ucase);
-
-		}
-
-	}
+    this->voisins.insert(std::make_pair(this, 0));
 
 }
 
-void Carte::ajouter_tresor(int position){
+void Carte::ajouter_case(Carte::Case *ucase) {
 
-	if(position > this->capacite) {
-		std::cerr << "Coordonées de trésor invalides." << std::endl;
-		exit(-3);
-	}
+    if (ucase->type == Carte::Terrain::Porte) {
 
-	if(this->cases[position]->type == Carte::Terrain::Eau){
-		std::cerr << "Un trésor ne peut pas être dans l'eau." << std::endl;
-		exit(-4);
-	}
+        if (porte) {
+            std::cerr << "Il ne peut y avoir plus d'une porte dans la matrice.";
+            std::cerr << std::endl;
+            exit(-2);
+        }
 
-	this->tresors.push_back(this->cases[position]);
-}
+        this->porte = ucase;
 
-void Carte::Case::ajouter_voisin_orthogonal(Carte::Case* ucase){
+    }
 
-	double distance = 0;
+    if (this->taille >= this->capacite) {
+        std::cerr << "La taille maximale de la matrice a été dépassée.";
+        std::cerr << std::endl;
+        exit(-5);
 
-	// Vérifier que c'est pas de l'eau et que élevation est acceptbable
-	if(this->type != Carte::Terrain::Eau 
-		&& ucase->type != Carte::Terrain::Eau
-		&& this->elevation - ucase->elevation > -2
-		&& this->elevation - ucase->elevation < 2){
+    }
 
-		switch (ucase->type){
+    this->cases[++taille] = ucase;
+    ucase->index = this->taille;
 
-			case Carte::Terrain::Foret : {
+    // Si pas premier de colonne, connecter avec voisin de gauche
+    if (this->taille % this->base != 1) {
+        ucase->ajouter_voisin_orthogonal(this->cases[this->taille - 1]);
+        this->cases[this->taille - 1]->ajouter_voisin_orthogonal(ucase);
+    }
 
-				distance = 2;
-				break;
-			}
+    // Si dernier de colonne
+    if (this->taille % this->base == 0) {
 
-			case Carte::Terrain::Route : {
+        // prendre la première case de la ligne et lui ajouter ce voisin
+        this->cases[this->taille - this->base + 1]->ajouter_voisin_orthogonal(ucase);
 
-				distance = this->type == Carte::Terrain::Route ? 0.5 : 1;
-				break;
-			}
+    }
 
-			default : {
+    // Si pas première ligne
+    if (this->taille > this->base) {
 
-				distance = 1;
-				break;
-			}
-		}
+        //ajouter voisin de haut
+        ucase->ajouter_voisin_orthogonal(this->cases[this->taille - this->base]);
+        this->cases[this->taille - this->base]->ajouter_voisin_orthogonal(ucase);
 
-		if(this->elevation - ucase->elevation < 0) distance *= 2; 
-		this->voisins.insert(std::make_pair(ucase, distance));
+        // Si pas premier de colonne
+        if (this->taille % this->base != 1) {
 
-	}
+            // voisin haut/gauche
+            ucase->ajouter_voisin_diagonal(this->cases[this->taille - this->base - 1]);
+            this->cases[this->taille - this->base - 1]->ajouter_voisin_diagonal(ucase);
+        }
 
-}
+        // Si pas dernier de colonne
+        if (this->taille % this->base != 0) {
 
-void Carte::Case::ajouter_voisin_diagonal(Carte::Case* ucase){
+            // voisin haut/droit
+            ucase->ajouter_voisin_diagonal(this->cases[this->taille - this->base + 1]);
+            this->cases[this->taille - this->base + 1]->ajouter_voisin_diagonal(ucase);
 
-	double distance = 0;
+        }
 
-	// Vérifier que c'est pas de l'eau et que élevation est acceptbable
-	if(this->type != Carte::Terrain::Eau 
-		&& ucase->type != Carte::Terrain::Eau
-		&& this->elevation - ucase->elevation >= -1
-		&& this->elevation - ucase->elevation <= 1){
-
-
-		switch (ucase->type){
-
-			case Carte::Terrain::Foret : {
-
-				distance = 2.8;
-				break;
-			}
-
-			case Carte::Terrain::Route : {
-
-				distance = this->type == Carte::Terrain::Route ? 0.7 : 1.4;
-				break;
-			}
-
-			default : {
-
-				distance = 1.4;
-				break;
-			}
-		}
-
-		if(this->elevation - ucase->elevation < 0) distance *= 2; 
-
-		this->voisins.insert(std::make_pair(ucase, distance));
-
-	}
+    }
 
 }
 
-void Carte::calculer_chemins(Carte::Case* debut){
+void Carte::ajouter_tresor(int position) {
 
-	// Ajouter tous les noeuds dans la liste de voisins de la case debut
-	for(auto it = this->cases.begin(); it != this->cases.end() ; ++it) {
+    if (position > this->capacite) {
+        std::cerr << "Coordonées de trésor invalides." << std::endl;
+        exit(-3);
+    }
 
-		if(it->second == debut){
+    if (this->cases[position]->type == Carte::Terrain::Eau) {
+        std::cerr << "Un trésor ne peut pas être dans l'eau." << std::endl;
+        exit(-4);
+    }
 
-			debut->voisins.insert(std::make_pair(debut, 0));
+    this->tresors.push_back(this->cases[position]);
+}
 
-		} else if(debut->voisins.find(it->second) == debut->voisins.end()){
+void Carte::Case::ajouter_voisin_orthogonal(Carte::Case *ucase) {
 
-			debut->voisins.insert(std::make_pair(it->second, std::numeric_limits<double>::max()));
+    double distance = 0;
 
-		}
+    // Vérifier que c'est pas de l'eau et que élevation est acceptbable
+    if (this->type != Carte::Terrain::Eau
+        && ucase->type != Carte::Terrain::Eau
+        && this->elevation - ucase->elevation > -2
+        && this->elevation - ucase->elevation < 2) {
 
-		it->second->visite = false;
+        switch (ucase->type) {
 
-	}
+            case Carte::Terrain::Foret : {
 
-	while (true) {
+                distance = 2;
+                break;
+            }
 
-		// trouver le noeud le plus proche non visité
-		std::pair<Carte::Case*, double> ucase (nullptr, NULL);
-		for(auto it = debut->voisins.begin() ; it != debut->voisins.end() ; ++it) {
+            case Carte::Terrain::Route : {
 
-			if(!ucase.first || (it->first->visite == false && it->second < ucase.second)){
+                distance = this->type == Carte::Terrain::Route ? 0.5 : 1;
+                break;
+            }
 
-				ucase = std::make_pair(it->first, it->second);
+            default : {
 
-			}
-		}
+                distance = 1;
+                break;
+            }
+        }
 
-		//Si aucun noeud à visiter, sortir de la boucle
-		if(ucase.first->visite == true) break;
+        if (this->elevation - ucase->elevation < 0) distance *= 2;
+        this->voisins.insert(std::make_pair(ucase, distance));
 
-		// parcourir les voisins du noeud et mettre à jour les distances.
-		for(auto it = ucase.first->voisins.begin() ; it != ucase.first->voisins.end() ; ++it) {
-
-			if(ucase.second + it->second < debut->voisins[it->first]){
-
-				debut->voisins[it->first] = ucase.second + it->second;
-			}
-
-		}
-
-		ucase.first->visite = true;
-
-	}
+    }
 
 }
 
-void Carte::afficher_meilleurs_chemins(){
+void Carte::Case::ajouter_voisin_diagonal(Carte::Case *ucase) {
 
-	calculer_chemins(this->porte);
+    double distance = 0;
 
-	for(auto it = this->tresors.begin() ; it != this->tresors.end() ; ++it){
-
-		calculer_chemins(*it);
-
-		std::cout << "Index : " << (*it)->index << " " << std::endl;
-	}
-
-	for(auto it = this->tresors.begin() ; it != this->tresors.end() ; ++ it) {
-
-		std::cout << " ----- I : " << (*it)->index << std::endl;
-
-		for(auto it2 = (*it)->voisins.begin() ; it2 != (*it)->voisins.end() ; ++it2){
-
-			std::cout << "Index : " << (*it2).first->index << " Distance : " << (*it2).second << std::endl;
-		}
+    // Vérifier que c'est pas de l'eau et que élevation est acceptbable
+    if (this->type != Carte::Terrain::Eau
+        && ucase->type != Carte::Terrain::Eau
+        && this->elevation - ucase->elevation >= -1
+        && this->elevation - ucase->elevation <= 1) {
 
 
-	}
+        switch (ucase->type) {
 
+            case Carte::Terrain::Foret : {
+
+                distance = 2.8;
+                break;
+            }
+
+            case Carte::Terrain::Route : {
+
+                distance = this->type == Carte::Terrain::Route ? 0.7 : 1.4;
+                break;
+            }
+
+            default : {
+
+                distance = 1.4;
+                break;
+            }
+        }
+
+        if (this->elevation - ucase->elevation < 0) distance *= 2;
+
+        this->voisins.insert(std::make_pair(ucase, distance));
+
+    }
+
+}
+
+void Carte::calculer_chemins(Carte::Case *debut) {
+
+    // Ajouter tous les noeuds dans la liste de voisins de la case debut et initialiser à zéro
+    for (auto it : this->cases) {
+
+        if (debut->voisins.find(it.second) == debut->voisins.end()) {
+
+            debut->voisins.insert(std::make_pair(it.second, std::numeric_limits<double>::max()));
+
+        }
+
+        it.second->visite = false;
+
+    }
+
+    std::cout << "------Analyse des Cases...-----" << std::endl;
+
+    while (true) {
+
+        // trouver le noeud le plus proche non visité
+        std::pair<Carte::Case *, double> ucase(nullptr, NULL);
+
+        for (auto it : debut->voisins) {
+
+            if (ucase.first == nullptr || (!it.first->visite && it.second < ucase.second)) {
+
+                ucase = std::make_pair(it.first, it.second);
+
+            }
+        }
+
+        //Si aucun noeud à visiter, sortir de la boucle
+        std::cout << "Analyse : " << ucase.first->index << " Visite : " << ucase.first->visite << std::endl;
+
+        if (ucase.first->visite){
+        	std::cout << "Celui qui fait sortir : " << ucase.first->index << " Visite : " << ucase.first->visite << std::endl;
+        	break; 
+        }
+
+        // parcourir les voisins du noeud et mettre à jour les distances.
+        for (auto it = ucase.first->voisins.begin(); it != ucase.first->voisins.end(); ++it) {
+
+            if (ucase.second + it->second < debut->voisins[it->first]) {
+
+                debut->voisins[it->first] = ucase.second + it->second;
+            }
+
+        }
+
+        ucase.first->visite = true;
+
+    }
+
+}
+
+void Carte::afficher_meilleurs_chemins() {
+
+    calculer_chemins(this->porte);
+
+    for (auto it : this->tresors) {
+
+        calculer_chemins(it);
+        std::cout << " -- Tresor -- " << std::endl;
+        for (auto it2 : it->voisins) {
+
+            std::cout << "Index : " << it2.first->index << " Distance : " << it2.second << std::endl;
+        }
+    }
 
 }
 

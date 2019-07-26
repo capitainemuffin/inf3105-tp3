@@ -5,47 +5,52 @@
 class Carte {
 
 public:
-	enum class Terrain { Plaine, Eau, Foret, Route, Porte };
+    enum class Terrain {
+        Plaine, Eau, Foret, Route, Porte
+    };
 
-	class Case {
+    class Case {
 
-	public:
+    public:
 
-		// Attributs 
-		Carte::Terrain type;
-		int elevation;
-		bool visite;
-		int index;
-		//liste d'adjacence -> la case et la distance 
-        std::map<Case*, double> voisins;
+        // Attributs
+        Carte::Terrain type;
+        int elevation;
+        bool visite;
+        int index;
+        //liste d'adjacence -> la case et la distance
+        std::map<Case *, double> voisins;
 
         // Constructeur 
-		Case(char, int);
+        Case(char, int);
 
-		// Methode -> l'ajouter à la liste en calculant la distance.
-		void ajouter_voisin_orthogonal(Case*);
-		void ajouter_voisin_diagonal(Case*);
+        // Methode -> l'ajouter à la liste en calculant la distance.
+        void ajouter_voisin_orthogonal(Case *);
 
-		friend std::ostream& operator<< (std::ostream&, Carte::Case*); 
-		// Ajouter un voisin
+        void ajouter_voisin_diagonal(Case *);
 
-	};
+        friend std::ostream &operator<<(std::ostream &, Carte::Case *);
+        // Ajouter un voisin
 
-	std::map<int,Case*> cases;
-	std::vector<Carte::Case*> tresors;
-	int taille;
-	Case* porte;
-	int base;
-	int hauteur;
-	int capacite;
+    };
 
-	Carte(int, int);
-	~Carte();
+    std::map<int, Case *> cases;
+    std::vector<Carte::Case *> tresors;
+    int taille;
+    Case *porte;
+    int base;
+    int capacite;
 
-	void ajouter_case(Case*);
-	void ajouter_tresor(int position);
-	void calculer_chemins(Case*);
-	void afficher_meilleurs_chemins();
+    Carte(int, int);
 
-	void inserer(Case&);
+    ~Carte();
+
+    void ajouter_case(Case *);
+
+    void ajouter_tresor(int position);
+
+    void calculer_chemins(Case *);
+
+    void afficher_meilleurs_chemins();
+
 };

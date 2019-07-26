@@ -1,0 +1,4 @@
+.o*
+.idea/*
+[Cc][Mm]ake*
+.DS_Store
