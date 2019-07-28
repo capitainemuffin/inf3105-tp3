@@ -1,27 +1,5 @@
 #include "carte.h"
 
-void permutations(std::vector<std::string> tresors, int i, int n,
-                  std::vector<std::pair<std::vector<std::string>, double>> &combinaisons) {
-    // base condition
-    if (i == n - 1) {
-
-        combinaisons.push_back(std::make_pair(tresors, 0));
-        return;
-    }
-
-    // process each character of the remaining string
-    for (int j = i; j < n; j++) {
-        // swap character at index i with current character
-        std::swap(tresors[i], tresors[j]);        // STL swap() used
-
-        // recurse for string [i+1, n-1]
-        permutations(tresors, i + 1, n, combinaisons);
-
-        // backtrack (restore the string to its original state)
-        swap(tresors[i], tresors[j]);
-    }
-}
-
 /**
  * Constructeur de Carte
  *
@@ -218,12 +196,10 @@ void Carte::Case::ajouter_voisin_orthogonal(Carte::Case *ucase) {
         switch (ucase->type) {
 
             case Carte::Terrain::Foret :
-
                 distance = 2;
                 break;
 
             case Carte::Terrain::Route :
-
                 distance = this->type == Carte::Terrain::Route ? 0.5 : 1;
                 break;
 
@@ -254,7 +230,6 @@ void Carte::Case::ajouter_voisin_diagonal(Carte::Case *ucase) {
         && this->elevation - ucase->elevation >= -1
         && this->elevation - ucase->elevation <= 1) {
 
-
         switch (ucase->type) {
 
             case Carte::Terrain::Foret :
@@ -272,7 +247,7 @@ void Carte::Case::ajouter_voisin_diagonal(Carte::Case *ucase) {
 
         }
 
-        if (this->elevation - ucase->elevation < 0) distance *= 2;
+        if (ucase->elevation - this->elevation == 1) distance *= 2;
         this->voisins.insert(std::make_pair(ucase, distance));
 
     }
@@ -340,6 +315,39 @@ void Carte::calculer_chemins(Carte::Case *debut) {
 }
 
 /**
+ * Calcule toutes les combinaisons possibles
+ *
+ * @param tresors une liste de noms de trésors
+ * @param i le décalage
+ * @param n la taille
+ * @param combinaisons la liste où ajouter les combinaisons possibles
+ *
+ */
+void Carte::trouver_combinaisons(std::vector<std::string> tresors_valides, int i, int n,
+                                 std::vector<std::pair<std::vector<std::string>, double>> &combinaisons) {
+    if (i == n - 1) {
+
+        double distance = porte->voisins[this->tresors[tresors_valides[0]]];
+
+        for (unsigned long j = 0; j < tresors_valides.size() - 1; j++) {
+
+            distance += this->tresors[tresors_valides[j]]->voisins[this->tresors[tresors_valides[j + 1]]];
+        }
+
+        distance += this->tresors[tresors_valides[tresors_valides.size() - 1]]->voisins[this->porte];
+
+        combinaisons.push_back(std::make_pair(tresors_valides, distance));
+        return;
+    }
+
+    for (int j = i; j < n; j++) {
+        std::swap(tresors_valides[i], tresors_valides[j]);
+        trouver_combinaisons(tresors_valides, i + 1, n, combinaisons);
+        swap(tresors_valides[i], tresors_valides[j]);
+    }
+}
+
+/**
  * Affiche les meilleurs chemins possibles pour récolter les 3 trésors
  * et retourner à la porte
  */
@@ -358,45 +366,42 @@ void Carte::afficher_meilleurs_chemins() {
     std::vector<std::string> tresors_valides;
     for (const auto it : this->tresors) {
 
-        std::cout <<"--------" << it.first << it.second->index <<"--------" << std::endl;
-        for(auto it2 : it.second->voisins){
-
-            std::cout << "Index : " << it2.first->index << " Distance " << it2.second << std::endl;
-        }
-
-        std::cout <<"--------" << "--------" << std::endl;
-
         if (porte->voisins[it.second] != std::numeric_limits<double>::max()) tresors_valides.push_back(it.first);
     }
 
     // calculer toutes les combinaisons possibles
     std::vector<std::pair<std::vector<std::string>, double>> combinaisons;
-    permutations(tresors_valides, 0, tresors_valides.size(), combinaisons);
+    trouver_combinaisons(tresors_valides, 0, tresors_valides.size(), combinaisons);
 
-    // calculer toutes les distances
-    for (unsigned long i = 0; i < combinaisons.size(); i++) {
+    // trouver et garder les meilleurs
+    double meilleur = std::numeric_limits<double>::max();
+    for(int i = 0 ; i < combinaisons.size() ; i++){
+        if(combinaisons[i].second < meilleur) meilleur = combinaisons[i].second;
+    }
 
-        double distance = porte->voisins[this->tresors[combinaisons[i].first[0]]];
+    std::vector<std::pair<std::vector<std::string>, double>> meilleurs_chemins;
+    for(int i = 0 ; i < combinaisons.size() ; i++){
+        if((float)combinaisons[i].second == (float)meilleur) meilleurs_chemins.push_back(combinaisons[i]);
+    }
 
-        std::cout << " P -> " << combinaisons[i].first[0] << " : "
-                  << porte->voisins[this->tresors[combinaisons[i].first[0]]] << std::endl;
+    // affichage
+    for (unsigned long i = 0; i < meilleurs_chemins.size(); i++) {
 
-        for (unsigned long j = 0; j < combinaisons[i].first.size() - 1; j++) {
+        std::cout << "Porte -> " << meilleurs_chemins[i].first[0] << " : "
+                  << porte->voisins[this->tresors[meilleurs_chemins[i].first[0]]] << std::endl;
 
-            distance += this->tresors[combinaisons[i].first[j]]->voisins[this->tresors[combinaisons[i].first[j + 1]]];
-            std::cout << combinaisons[i].first[j] << " -> " << combinaisons[i].first[j + 1] << " : "
-                      << this->tresors[combinaisons[i].first[j]]->voisins[this->tresors[combinaisons[i].first[j + 1]]]
+        for (unsigned long j = 0; j < meilleurs_chemins[i].first.size() - 1; j++) {
+
+            std::cout << meilleurs_chemins[i].first[j] << " -> " << meilleurs_chemins[i].first[j + 1] << " : "
+                      << this->tresors[meilleurs_chemins[i].first[j]]->voisins[this->tresors[meilleurs_chemins[i].first[j + 1]]]
                       << std::endl;
         }
 
-        std::cout << combinaisons[i].first[combinaisons[i].first.size() - 1] << " -> P : "
-                  << porte->voisins[this->tresors[combinaisons[i].first[combinaisons[i].first.size() - 1]]]
+        std::cout << meilleurs_chemins[i].first[meilleurs_chemins[i].first.size() - 1] << " -> Porte : "
+                  << this->tresors[meilleurs_chemins[i].first[meilleurs_chemins[i].first.size() - 1]]->voisins[this->porte]
                   << std::endl;
 
-        distance += this->tresors[combinaisons[i].first[combinaisons[i].first.size() - 1]]->voisins[this->porte];
-        combinaisons[i].second = distance;
-
-        std::cout << " Distance : " << distance << std::endl;
+        std::cout << "Distance : " << meilleurs_chemins[i].second << std::endl << std::endl;
 
     }
 

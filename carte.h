@@ -62,7 +62,7 @@ public:
     };
 
     std::map<int, Case *> cases;
-    std::map<std::string,Case *> tresors;
+    std::map<std::string, Case *> tresors;
     int taille;
     Case *porte;
     int base;
@@ -107,5 +107,16 @@ public:
      * et retourner à la porte
      */
     void afficher_meilleurs_chemins();
+
+    /**
+     * Calcule toutes les combinaisons possibles
+     *
+     * @param tresors une liste de noms de trésors
+     * @param i le décalage
+     * @param n la taille
+     * @param combinaisons la liste où ajouter les combinaisons possibles
+     */
+    void trouver_combinaisons(std::vector<std::string>, int, int,
+                              std::vector<std::pair<std::vector<std::string>, double>> &);
 
 };
