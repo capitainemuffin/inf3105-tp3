@@ -62,7 +62,7 @@ public:
     };
 
     std::map<int, Case *> cases;
-    std::vector<Carte::Case *> tresors;
+    std::map<std::string,Case *> tresors;
     int taille;
     Case *porte;
     int base;

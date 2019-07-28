@@ -75,7 +75,6 @@ int main() {
 
     // Afficher les meilleurs chemins
     carte.afficher_meilleurs_chemins();
-    std::cout << std::endl;
 
     return 0;
 }

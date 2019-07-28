@@ -1,5 +1,27 @@
 #include "carte.h"
 
+void permutations(std::vector<std::string> tresors, int i, int n,
+                  std::vector<std::pair<std::vector<std::string>, double>> &combinaisons) {
+    // base condition
+    if (i == n - 1) {
+
+        combinaisons.push_back(std::make_pair(tresors, 0));
+        return;
+    }
+
+    // process each character of the remaining string
+    for (int j = i; j < n; j++) {
+        // swap character at index i with current character
+        std::swap(tresors[i], tresors[j]);        // STL swap() used
+
+        // recurse for string [i+1, n-1]
+        permutations(tresors, i + 1, n, combinaisons);
+
+        // backtrack (restore the string to its original state)
+        swap(tresors[i], tresors[j]);
+    }
+}
+
 /**
  * Constructeur de Carte
  *
@@ -10,7 +32,7 @@ Carte::Carte(int base, int hauteur) : taille(0), porte(nullptr) {
 
     if (base < 1 || hauteur < 1) {
         std::cerr
-                << "La longueur et la largeur de la matrice doivent êtres plus grand que 1."
+                << "La longueur et la largeur de la matrice doivent êtres plus grands que 1."
                 << std::endl;
         exit(-1);
     }
@@ -113,9 +135,8 @@ void Carte::ajouter_case(Carte::Case *ucase) {
     if (this->taille % this->base == 0) {
 
         // prendre la première case de la ligne et lui ajouter ce voisin
-        this->cases[this->taille - this->base + 1]->ajouter_voisin_orthogonal(
-                ucase);
-
+        this->cases[this->taille - this->base + 1]->ajouter_voisin_orthogonal(ucase);
+        ucase->ajouter_voisin_orthogonal(this->cases[this->taille - this->base + 1]);
     }
 
     // Si pas première ligne
@@ -169,7 +190,14 @@ void Carte::ajouter_tresor(int position) {
         exit(-4);
     }
 
-    this->tresors.push_back(this->cases[position]);
+    auto it = this->tresors.begin();
+    int i = 1;
+    while (it != this->tresors.end()) {
+        i++;
+        ++it;
+    }
+
+    this->tresors["T" + std::to_string(i)] = this->cases[position];
 }
 
 /**
@@ -317,21 +345,66 @@ void Carte::calculer_chemins(Carte::Case *debut) {
  */
 void Carte::afficher_meilleurs_chemins() {
 
+    // calculer chemins porte
     calculer_chemins(this->porte);
 
-    for (auto it : porte->voisins) {
+    // calculer chemins tresors
+    for (const auto it : this->tresors) {
+        calculer_chemins(it.second);
 
-        std::cout << "Index : " << it.first->index << " Distance : "
-                  << it.second << std::endl;
     }
 
-    for (auto it : this->tresors) {
+    // retirer les trésors innatégnables
+    std::vector<std::string> tresors_valides;
+    for (const auto it : this->tresors) {
 
-        calculer_chemins(it);
-        std::cout << "Trésor : Index : " << it->index << std::endl;
+        std::cout <<"--------" << it.first << it.second->index <<"--------" << std::endl;
+        for(auto it2 : it.second->voisins){
+
+            std::cout << "Index : " << it2.first->index << " Distance " << it2.second << std::endl;
+        }
+
+        std::cout <<"--------" << "--------" << std::endl;
+
+        if (porte->voisins[it.second] != std::numeric_limits<double>::max()) tresors_valides.push_back(it.first);
+    }
+
+    // calculer toutes les combinaisons possibles
+    std::vector<std::pair<std::vector<std::string>, double>> combinaisons;
+    permutations(tresors_valides, 0, tresors_valides.size(), combinaisons);
+
+    // calculer toutes les distances
+    for (unsigned long i = 0; i < combinaisons.size(); i++) {
+
+        double distance = porte->voisins[this->tresors[combinaisons[i].first[0]]];
+
+        std::cout << " P -> " << combinaisons[i].first[0] << " : "
+                  << porte->voisins[this->tresors[combinaisons[i].first[0]]] << std::endl;
+
+        for (unsigned long j = 0; j < combinaisons[i].first.size() - 1; j++) {
+
+            distance += this->tresors[combinaisons[i].first[j]]->voisins[this->tresors[combinaisons[i].first[j + 1]]];
+            std::cout << combinaisons[i].first[j] << " -> " << combinaisons[i].first[j + 1] << " : "
+                      << this->tresors[combinaisons[i].first[j]]->voisins[this->tresors[combinaisons[i].first[j + 1]]]
+                      << std::endl;
+        }
+
+        std::cout << combinaisons[i].first[combinaisons[i].first.size() - 1] << " -> P : "
+                  << porte->voisins[this->tresors[combinaisons[i].first[combinaisons[i].first.size() - 1]]]
+                  << std::endl;
+
+        distance += this->tresors[combinaisons[i].first[combinaisons[i].first.size() - 1]]->voisins[this->porte];
+        combinaisons[i].second = distance;
+
+        std::cout << " Distance : " << distance << std::endl;
 
     }
 
 }
+
+
+
+
+
 
 
