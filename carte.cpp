@@ -357,14 +357,14 @@ void Carte::afficher_meilleurs_chemins() {
     calculer_chemins(this->porte);
 
     // calculer chemins tresors
-    for (const auto it : this->tresors) {
+    for (const auto& it : this->tresors) {
         calculer_chemins(it.second);
 
     }
 
     // retirer les trésors innatégnables
     std::vector<std::string> tresors_valides;
-    for (const auto it : this->tresors) {
+    for (const auto& it : this->tresors) {
 
         if (porte->voisins[it.second] != std::numeric_limits<double>::max()) tresors_valides.push_back(it.first);
     }
@@ -375,12 +375,12 @@ void Carte::afficher_meilleurs_chemins() {
 
     // trouver et garder les meilleurs
     double meilleur = std::numeric_limits<double>::max();
-    for(int i = 0 ; i < combinaisons.size() ; i++){
-        if(combinaisons[i].second < meilleur) meilleur = combinaisons[i].second;
+    for(const auto& it : combinaisons){
+        if(it.second < meilleur) meilleur = it.second;
     }
 
     std::vector<std::pair<std::vector<std::string>, double>> meilleurs_chemins;
-    for(int i = 0 ; i < combinaisons.size() ; i++){
+    for(unsigned long i = 0 ; i < combinaisons.size() ; i++){
         if((float)combinaisons[i].second == (float)meilleur) meilleurs_chemins.push_back(combinaisons[i]);
     }
 
